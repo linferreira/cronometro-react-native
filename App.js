@@ -1,52 +1,88 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+
+let timer = null;
+let ss = 0;
+let mm = 0;
+let hh = 0;
 
 export default function App() {
-  const [timer, setTimer] = useState(0)
-  const [active, setActive] = useState(null)
+  const [number, setNumber] = useState(0);
+  const [buttonLabel, setButtonLabel] = useState("INICIAR");
+  const [lastTime, setLastTime] = useState(null);
 
-  const start = () => {
-    let time = timer
+  function start() {
+    if (timer) {
+      //Aqui para o timer
+      clearInterval(timer);
+      timer = null;
 
-    if (active !== null) {
-      clearInterval(active);
-      setActive(null);
+      setButtonLabel("INICIAR");
     } else {
-      setActive(setInterval(() => {
-        time += 0.1
-      }, 100))
-      setTimer(time)
+      //Comecar o timer...
+      timer = setInterval(() => {
+        ss++;
+
+        if (ss == 60) {
+          ss = 0;
+          mm++;
+        }
+
+        if (mm == 60) {
+          mm = 0;
+          hh++;
+        }
+
+        let format =
+          (hh < 10 ? "0" + hh : hh) +
+          ":" +
+          (mm < 10 ? "0" + mm : mm) +
+          ":" +
+          (ss < 10 ? "0" + ss : ss);
+
+        setNumber(format);
+      }, 1000);
+
+      setButtonLabel("PARAR");
     }
   }
 
-  const limpar = () => {
-    if (active !== null) {
-      clearInterval(active);
-      setActive(null);
+  function clear() {
+    if (timer) {
+      //Parar o timer!
+      clearInterval(timer);
+      timer = null;
     }
-    setTimer(0);
+
+    setLastTime(number);
+    setNumber(0);
+    ss = 0;
+    mm = 0;
+    hh = 0;
+    setButtonLabel("INICIAR");
   }
 
   return (
     <View style={styles.container}>
-      <Image style={styles.cronometro} source={require('./src/cronometro.png')} />
+      <Image style={styles.image} source={require("./src/cronometro.png")} />
 
-      <Text style={styles.timer}>{timer.toFixed(1)}</Text>
+      <Text style={styles.timer}> {number} </Text>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => start()}>
-          <Text style={styles.buttontext}>
-            Começar
-          </Text>
+        <TouchableOpacity style={styles.button} onPress={start}>
+          <Text style={styles.buttonText}> {buttonLabel} </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={() => limpar()} >
-          <Text style={styles.buttontext}>
-            Limpar
-          </Text>
+        <TouchableOpacity style={styles.button} onPress={clear}>
+          <Text style={styles.buttonText}>LIMPAR</Text>
         </TouchableOpacity>
       </View>
 
+      <View>
+        <Text style={styles.runningText}>
+          {lastTime ? "Ultimo tempo: " + lastTime : ""}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -59,29 +95,39 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
+  image: {
+    width: '85%',
+    height: '45%'
+  },
   timer: {
     color: '#fff',
-    fontSize: 65,
+    fontSize: 45,
     fontWeight: 'bold',
-    marginTop: -160
+    marginTop: -190
   },
   buttonContainer: {
     flexDirection: 'row',
-    marginTop: 100,
+    marginTop: 150,
     height: 40,
   },
   button: {
-    flex: 1,
+    flex:1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF',
     height: 40,
-    margin: 20,
-    borderRadius: 5,
+    margin: 17,
+    borderRadius: 9
   },
-  buttontext: {
+  buttonText: {
     fontSize: 18,
     fontWeight: 'bold',
-  }
-
+    color: '#116193'
+  },
+  runningText: {    
+    marginTop: 40,
+    fontSize: 23,
+    color: "#116193",
+    fontStyle: "italic",
+  },
 });
